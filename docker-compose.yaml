@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack的主要端口
+      - "127.0.0.1:4510-4559:4510-4559"  # 各個雲服務對應的端口
+    environment:
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - localstack-net # 指定容器網路
+
+  
+  code-server:
+    image: codercom/code-server:latest
+    container_name: code-server
+    ports:
+      - "8080:8080" # Web版VSCode的端口
+      - "5000:5000" # flask端口
+    volumes:
+      - "./.config:/home/coder/.config" #
+      - ".:/home/coder/project"
+    environment:
+      - DOCKER_USER=cxcxc # 內部終端機用戶名稱
+      - PASSWORD=123456 # Web版VSCode的首次登入密碼
+      - ENV=${ENV} # 依照目前所在環境(開發/生產去設定環境變數)
+    entrypoint: /bin/bash -c "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && sudo apt update && sudo apt install -y python3-distutils && python3 get-pip.py && PATH=/home/coder/.local/bin && pip install -r project/requirements.txt && PATH=/usr/lib/code-server/lib/vscode/bin/remote-cli:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games && cd project && code-server --install-extension ms-python.python && /usr/bin/entrypoint.sh --bind-addr 0.0.0.0:8080 ." # 安裝 pip 與 相關的python 套件
+    networks:
+      - localstack-net
+
+networks:
+  localstack-net:
+    name: localstack-net
+    driver: bridge

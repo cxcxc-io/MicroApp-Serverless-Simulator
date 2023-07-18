@@ -1,0 +1,4 @@
+boto3==1.26.143
+flask==2.3.2
+pytest==7.3.1
+flask_cors==3.0.10

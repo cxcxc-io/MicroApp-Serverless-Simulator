@@ -1,0 +1,15 @@
+.config
+.gitlab
+.localstack
+docker-compose_aws.yaml
+docker-compose_code-server.yaml
+docker-compose_gitlab.yaml
+*/__*
+__pycache__
+tests/.pytest_cache
+tests/__pycache__
+daos/__pycache__
+controllers/__pycache__
+tests/*.txt
+testfile
+volume
